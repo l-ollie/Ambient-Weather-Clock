@@ -4,7 +4,7 @@
 
 const int epsChipPowerDown = 2;
 
-boolean wifiEnabled = false;
+boolean StartTalk = true;
 String epsMsg = "";
 void setup() {
 
@@ -16,31 +16,32 @@ void setup() {
 
   //Define eps CHPD pin
   pinMode(epsChipPowerDown, OUTPUT);
-  //Turn reset pin on eps ON (functions normal)
-  digitalWrite(epsChipPowerDown, HIGH);
+  //Turn eps ON (functions normal)
+    digitalWrite(epsChipPowerDown, HIGH);
 }
 
 void loop() {
 
-  if (wifiEnabled == false) {
-    delay(2000);
+  if (StartTalk == true) {
+    delay(500);
     if (checkEpsReturn("AT", "OK", "ERROR")) {
       Serial.println("Jeeeeeej");
     } else {
       Serial.println("Awwwwww");
     }
-    wifiEnabled = true;
+    StartTalk = false;
   }
 
+  //Enable only this to talk directly to EPS through the Serial monitor
   //  serialBrigde();
-
+  //listen to "CONNECT" on the eps
   //  listenToEps();
 
 }
 
 
 
-void listenToEps() {
+void listenToConnect() {
   while (Serial1.available()) {
     delay(100);
     char inChar = (char)Serial1.read();
@@ -72,7 +73,8 @@ void rebootConnect() {
 bool checkEpsReturn(String atCommand, String checkForMsg, String errorMsg) {
   Serial.println("Sending AT commnand : '" + atCommand + "'. check for msg '" + checkForMsg + "' and error Msg '" + errorMsg + "'");
   Serial1.println(atCommand);
-  delay(250);
+  delay(6000);
+
   while (Serial1.available()) {
     delay(10);
     char inChar = (char)Serial1.read();
@@ -84,21 +86,23 @@ bool checkEpsReturn(String atCommand, String checkForMsg, String errorMsg) {
       epsMsg + epsMsg.trim();
       // check if the message is "OK"
       if (epsMsg == checkForMsg) {
-        Serial.println("COMPLEET : eps says :" + checkForMsg);
+        Serial.println("COMPLEET : eps says : '" + checkForMsg + "'");
+        delay(2500);
         return true;
-      } else {
+      }
+      else {
         if (epsMsg == errorMsg) {
-          Serial.println("Error : eps says" + errorMsg);
+          Serial.println("Error : eps says" + errorMsg + checkForMsg + "'");
+          delay(2500);
           return false;
         }
       }
 
-      //      after reading a new line delete the whole string
+      //after reading a new line delete the whole string
       epsMsg = "";
     }
   }
 }
-
 
 void serialBrigde() {
   // Send bytes from ESP8266 -> Teensy to Computer
