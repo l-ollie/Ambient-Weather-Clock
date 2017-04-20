@@ -3,7 +3,7 @@
 //**** PIN2 to CHPD on EPS8266-01*******
 
 const int epsChipPowerDown = 2;
-
+String error = "ERROR";
 boolean StartTalk = true;
 String epsMsg = "";
 void setup() {
@@ -17,14 +17,14 @@ void setup() {
   //Define eps CHPD pin
   pinMode(epsChipPowerDown, OUTPUT);
   //Turn eps ON (functions normal)
-    digitalWrite(epsChipPowerDown, HIGH);
+  digitalWrite(epsChipPowerDown, HIGH);
 }
 
 void loop() {
 
   if (StartTalk == true) {
     delay(500);
-    if (checkEpsReturn("AT", "OK", "ERROR")) {
+    if (EPSSendAndCheckReturn("AT", "OK", "ERROR")) {
       Serial.println("Jeeeeeej");
     } else {
       Serial.println("Awwwwww");
@@ -63,14 +63,66 @@ void listenToConnect() {
   }
 }
 
+void restartESP() {
+  if (digitalRead(epsChipPowerDown)) {
+    Serial.println("CHPD is HIGH, turning it to LOW");
+    digitalWrite(epsChipPowerDown, LOW);
+    delay(3000);
+  }
 
-void rebootConnect() {
-  Serial.println("at eps");
-  Serial1.println("AT");
+  digitalWrite(epsChipPowerDown, HIGH);
+  if (EPScheckReturn("ready")) {
+    Serial.println("eps is ready");
+  } else{
+    Serial.println("eps doent return the wishfull response");
+  }
+}
+
+boolean EPScheckReturn (String checkForMsg) {
+  //Listen 6 times
+  for (int i = 0; i >= 6; i++) {
+    delay(1000);
+
+    while (Serial1.available()) {
+      delay(10);
+      char inChar = (char)Serial1.read();
+      epsMsg += inChar;
+
+      //  check if I see a new line
+      if (inChar == '\n' || inChar == '\r') {
+        // trim string so I can do the comparson
+        epsMsg = epsMsg.trim();
+        // check if the message is "OK"
+        if (epsMsg == checkForMsg) {
+          Serial.println("EPScheckReturn succesful : eps says : '" + checkForMsg + "'");
+          delay(250);
+          return true;
+        }
+        else {
+          if (epsMsg == error) {
+            Serial.println("EPScheckReturn failed : eps says" + checkForMsg + "'");
+            delay(250);
+            return false;
+          }
+        }
+        
+        //Send  eps message to serial if not '\n'
+        if(epsMsg != "");
+        Serial.println("ESP message : '" + epsMsg + "'");
+        //after reading a new line delete the whole string
+        epsMsg = "";
+      }
+    }
+  }
+}
+
+void clearSerialBuffer() {
+  delay(1000);
+  Serial1.flush();
 }
 
 
-bool checkEpsReturn(String atCommand, String checkForMsg, String errorMsg) {
+bool EPSSendAndCheckReturn(String atCommand, String checkForMsg, String errorMsg) {
   Serial.println("Sending AT commnand : '" + atCommand + "'. check for msg '" + checkForMsg + "' and error Msg '" + errorMsg + "'");
   Serial1.println(atCommand);
   delay(6000);
@@ -83,7 +135,7 @@ bool checkEpsReturn(String atCommand, String checkForMsg, String errorMsg) {
     //  check if I see a new line
     if (inChar == '\n' || inChar == '\r') {
       // trim string so I can do the comparson
-      epsMsg + epsMsg.trim();
+      epsMsg = epsMsg.trim();
       // check if the message is "OK"
       if (epsMsg == checkForMsg) {
         Serial.println("COMPLEET : eps says : '" + checkForMsg + "'");
@@ -97,7 +149,8 @@ bool checkEpsReturn(String atCommand, String checkForMsg, String errorMsg) {
           return false;
         }
       }
-
+      //Send every eps message to serial
+      Serial.println("ESP message : '" + epsMsg + "'");
       //after reading a new line delete the whole string
       epsMsg = "";
     }
