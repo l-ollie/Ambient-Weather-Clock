@@ -12,8 +12,6 @@ void setup() {
   // Setup Teensy to ESP8266 serial
   Serial1.begin(115200);
 
-  //Define esp CHPD pin
-  pinMode(espChipPowerDown, OUTPUT);
   //Turn esp ON (functions normal)
       restartESP();
 

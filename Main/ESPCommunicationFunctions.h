@@ -1,8 +1,12 @@
 #include "ESPCommunicationHandler.h"
 
+//Define esp CHPD pin
 const int espChipPowerDown = 2;
 
+
 void restartESP() {
+  pinMode(espChipPowerDown, OUTPUT);
+
   Serial.println("restartESP() running function");
   if (digitalRead(espChipPowerDown)) {
     Serial.println("restartESP() CHPD is HIGH, turning it to LOW");
