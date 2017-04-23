@@ -5,6 +5,10 @@
 const String password = "f4CS36xVmnjn";
 const String ssid = "VGV75190DE816";
 
+const String weatherApi = "api.openweathermap.org";
+const String weatherApiCityInNl = "utrecht";
+String weatherApiKey = "5930c34e06a21b4ff7ccb6bf9ddb5f3e";
+
 
 #include "ESPCommunicationFunctions.h"
 
@@ -18,17 +22,16 @@ void setup() {
 
   delay(1000);
   if (startESP()) {
-  Serial.println("startESP() COMPLEET get info from web");
+    getWeather();
   }
+
+//  pinMode(2, OUTPUT);
+//  digitalWrite(2, HIGH);
 }
 
 void loop() {
-
-
   //Enable only this to talk directly to ESP through the Serial monitor
   serialBrigde();
-
-
 
 }
 
