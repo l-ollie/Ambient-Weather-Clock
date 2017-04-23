@@ -40,6 +40,7 @@ boolean ESPcheckReturn (String checkForMsg) {
     }
   }
   //if i check for 12 time and no wishfull result, return false
+  Serial.println("ESPcheckReturn() no succes");
   return false;
 }
 
@@ -86,8 +87,9 @@ bool ESPSendAndCheckReturn(String atCommand, String checkForMsg, String errorMsg
       }
     }
   }
+
   //if i check for 12 time and no wishfull result, return false
-  return false;
   Serial.println("ESPSendAndCheckReturn() no succes");
+  return false;
 }
 

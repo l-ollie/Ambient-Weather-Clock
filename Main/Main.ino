@@ -18,6 +18,7 @@ void setup() {
 
   delay(1000);
   startESP();
+  joinAP();
 }
 
 void loop() {

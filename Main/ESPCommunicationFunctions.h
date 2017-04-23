@@ -12,31 +12,39 @@ void setESPMode(String ESPmode) {
 
   //check the mode and edit at command
   if (ESPmode == "station") {
-    atCommand = "AT+CWMODE=" + 1;
-  } else {
-    if (ESPmode == "accessPoint") {
-      atCommand = "AT+CWMODE=" + 2;
-    } else {
-      if (ESPmode == "both")
-        atCommand = "AT+CWMODE=" + 3;
-    }
+    atCommand += "1";
+  }
+  if (ESPmode == "accessPoint") {
+    atCommand += "2";
+  }
+  if (ESPmode == "both")
+    atCommand += "3";
 
-    //send at command and check for succes
-    if (ESPSendAndCheckReturn(atCommand, "OK", "FAIL"))
-    {
-      Serial.println("setESPMode() succesfull. ESP set mode " + ESPmode);
-    }
-    else
-    {
-      Serial.println("setESPMode() fail");
-    }
+
+  //send at command and check for succes
+  Serial.print("setESPMode() set mode command ESP :" + atCommand);
+  Serial.println(atCommand);
+  if (ESPSendAndCheckReturn(atCommand, "OK", "FAIL"))
+  {
+    Serial.println("setESPMode() succesfull. ESP set mode " + ESPmode);
+  }
+  else
+  {
+    Serial.println("setESPMode() fail");
   }
 }
+
 
 
 //========================================
 //========================================  CONFIG ESP
 //========================================
+
+void ESPconfigure() {
+  Serial.println("ESPconfigure() start setESPMode");
+  setESPMode("station");
+}
+
 
 bool ESPReadyForCommand() {
   if (ESPSendAndCheckReturn("AT", "OK", "ERROR")) {
@@ -67,7 +75,7 @@ void startESP() {
   //check if wifi is connected
   if (!ESPcheckReturn("WIFI CONNECTED")) {
     //do configuration
-    Serial.println("startESP() NO WIFI CONNECTED do configuration");
+    ESPconfigure();
   }
 
   // check if got IP
@@ -77,16 +85,17 @@ void startESP() {
   }
   else {
     //do configuration
-      Serial.println("startESP() ESP NO IP do configuration");
+    Serial.println("startESP() ESP NO IP do configuration");
   }
-
-
-
 }
 
+void joinAP () {
+  String atCommand = "AT+CWJAP=";
+  atCommand += '"' + ssid + "\",\"" + password + '"';
 
-void ESPconfigure() {
-  setESPMode("station");
+  Serial.println(atCommand);
+
+  //  AT+ CWJAP =ssid,ssid
 }
 
 void clearSerialBuffer() {
