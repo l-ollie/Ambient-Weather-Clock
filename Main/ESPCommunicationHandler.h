@@ -20,12 +20,12 @@ boolean ESPcheckReturn (String checkForMsg) {
         espMsg = espMsg.trim();
         // check if the message is "OK"
         if (espMsg == checkForMsg) {
-          Serial.println("ESPcheckReturn() succesful. ESP MSG '" + checkForMsg + "'");
+          Serial.println("ESPcheckReturn() succesful. ESP MSG '" + espMsg + "'");
           return true;
         }
         else {
           if (espMsg == errorWord) {
-            Serial.println("ESPcheckReturn() failed. ESP MSG" + checkForMsg + "'");
+            Serial.println("ESPcheckReturn() failed. ESP MSG" + espMsg + "'");
             return false;
           }
         }

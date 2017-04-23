@@ -10,18 +10,26 @@ const int espChipPowerDown = 2;
 void setESPMode(String ESPmode) {
   String atCommand = "AT+CWMODE=";
 
-  if (ESPmode == "station")
+  //check the mode and edit at command
+  if (ESPmode == "station") {
     atCommand = "AT+CWMODE=" + 1;
+  } else {
+    if (ESPmode == "accessPoint") {
+      atCommand = "AT+CWMODE=" + 2;
+    } else {
+      if (ESPmode == "both")
+        atCommand = "AT+CWMODE=" + 3;
+    }
 
-  if (ESPmode == "accessPoint")
-    atCommand = "AT+CWMODE=" + 2;
-
-  if (ESPmode == "both")
-    atCommand = "AT+CWMODE=" + 3;
-
-  if (ESPSendAndCheckReturn(atCommand, "OK", "FAIL")) {
-    Serial.println("setESPMode() succesfull. EPS ready for use");
-
+    //send at command and check for succes
+    if (ESPSendAndCheckReturn(atCommand, "OK", "FAIL"))
+    {
+      Serial.println("setESPMode() succesfull. ESP set mode " + ESPmode);
+    }
+    else
+    {
+      Serial.println("setESPMode() fail");
+    }
   }
 }
 
@@ -47,52 +55,55 @@ void restartESP() {
 }
 
 void startESP() {
-  pinMode(espChipPowerDown, OUTPUT);
   Serial.println("startESP() running function");
-
+  pinMode(espChipPowerDown, OUTPUT);
   digitalWrite(espChipPowerDown, HIGH);
 
-  if (ESPcheckReturn("ready"))
-  {
-    Serial.println("startESP() ESP is ready");
-
-    //wait for eps to make connection on it self
-    //    delay(3000);
+  if (ESPcheckReturn("ready")) {
 
     // after cheking "ready" check if connected
-    if (ESPcheckReturn("WIFI CONNECTED"))
-    {
-      Serial.println("startESP() ESP WIFI CONNECTED ");
+    if (ESPcheckReturn("WIFI CONNECTED")) {
+
       //after ckeck "WIFI CONNECTED" check if got IP
-      if (ESPcheckReturn("WIFI GOT IP"))
-      {
-        Serial.println("startESP() ESP WIFI GOT IP");
+      if (ESPcheckReturn("WIFI GOT IP"))      {
+        //get connect to weather api
       }
-    }
-    //if no "WIFI CONNECTED" return
-    else
+      //if no IP hase recieved configure ESP
+      else {
+        //do configuration
+      }
+
+    } else
     {
-      Serial.println("startESP() ESP no WIFI CONNECTED");
+      //do configuration
     }
-    //if no "ready" return
-  } else {
-    Serial.println("startESP() ESP no ready");
+    Serial.println("startESP() ESP no WIFI CONNECTED");
+  }
+
+  //if no "ready" return
+  else {
+    Serial.println("startESP() ESP fail. No ready");
   }
 }
 
-void clearSerialBuffer() {
-  delay(1000);
-  Serial1.flush();
-}
 
-void serialBrigde() {
-  // Send bytes from ESP8266 -> Teensy to Computer
-  while ( Serial1.available() ) {
-    Serial.write( Serial1.read() );
+  void ESPconfigure() {
+    setESPMode("station");
   }
 
-  // Send bytes from Computer -> Teensy back to ESP8266
-  while ( Serial.available() ) {
-    Serial1.write( Serial.read() );
+  void clearSerialBuffer() {
+    delay(1000);
+    Serial1.flush();
   }
-}
+
+  void serialBrigde() {
+    // Send bytes from ESP8266 -> Teensy to Computer
+    while ( Serial1.available() ) {
+      Serial.write( Serial1.read() );
+    }
+
+    // Send bytes from Computer -> Teensy back to ESP8266
+    while ( Serial.available() ) {
+      Serial1.write( Serial.read() );
+    }
+  }
