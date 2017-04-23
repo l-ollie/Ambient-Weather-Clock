@@ -59,51 +59,49 @@ void startESP() {
   pinMode(espChipPowerDown, OUTPUT);
   digitalWrite(espChipPowerDown, HIGH);
 
-  if (ESPcheckReturn("ready")) {
-
-    // after cheking "ready" check if connected
-    if (ESPcheckReturn("WIFI CONNECTED")) {
-
-      //after ckeck "WIFI CONNECTED" check if got IP
-      if (ESPcheckReturn("WIFI GOT IP"))      {
-        //get connect to weather api
-      }
-      //if no IP hase recieved configure ESP
-      else {
-        //do configuration
-      }
-
-    } else
-    {
-      //do configuration
-    }
-    Serial.println("startESP() ESP no WIFI CONNECTED");
-  }
-
-  //if no "ready" return
-  else {
+  if (!ESPcheckReturn("ready")) {
     Serial.println("startESP() ESP fail. No ready");
+    return;
   }
+
+  //check if wifi is connected
+  if (!ESPcheckReturn("WIFI CONNECTED")) {
+    //do configuration
+    Serial.println("startESP() NO WIFI CONNECTED do configuration");
+  }
+
+  // check if got IP
+  if (ESPcheckReturn("WIFI GOT IP")) {
+    //get connect to weather api
+    Serial.println("startESP() check for weather");
+  }
+  else {
+    //do configuration
+      Serial.println("startESP() ESP NO IP do configuration");
+  }
+
+
+
 }
 
 
-  void ESPconfigure() {
-    setESPMode("station");
+void ESPconfigure() {
+  setESPMode("station");
+}
+
+void clearSerialBuffer() {
+  delay(1000);
+  Serial1.flush();
+}
+
+void serialBrigde() {
+  // Send bytes from ESP8266 -> Teensy to Computer
+  while ( Serial1.available() ) {
+    Serial.write( Serial1.read() );
   }
 
-  void clearSerialBuffer() {
-    delay(1000);
-    Serial1.flush();
+  // Send bytes from Computer -> Teensy back to ESP8266
+  while ( Serial.available() ) {
+    Serial1.write( Serial.read() );
   }
-
-  void serialBrigde() {
-    // Send bytes from ESP8266 -> Teensy to Computer
-    while ( Serial1.available() ) {
-      Serial.write( Serial1.read() );
-    }
-
-    // Send bytes from Computer -> Teensy back to ESP8266
-    while ( Serial.available() ) {
-      Serial1.write( Serial.read() );
-    }
-  }
+}

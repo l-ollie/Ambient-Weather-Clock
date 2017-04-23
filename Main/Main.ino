@@ -2,6 +2,10 @@
 //**** Teensy 3.2 RX1 = PIN0 TX1 = PIN1 to ESP8266-01*******
 //**** PIN2 to CHPD on ESP8266-01*******
 
+const String password = "f4CS36xVmnjn";
+const String ssid = "VGV75190DE816";
+
+
 #include "ESPCommunicationFunctions.h"
 
 void setup() {
@@ -12,11 +16,8 @@ void setup() {
   // Setup Teensy to ESP8266 serial
   Serial1.begin(115200);
 
-  //Turn esp ON (functions normal)
-      startESP();
-//  pinMode(2, OUTPUT);
-//  delay(3000);
-//  digitalWrite(2, HIGH);
+  delay(1000);
+  startESP();
 }
 
 void loop() {
