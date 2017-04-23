@@ -4,9 +4,39 @@
 const int espChipPowerDown = 2;
 
 //========================================
-//========================================  CONFIG ESP
+//========================================   ESP BASICS
 //========================================
-//AT+CWMODE=1
+
+void shutdownESP() {
+  Serial.println("shutdownESP turning off ESP");
+  pinMode(espChipPowerDown, OUTPUT);
+  digitalWrite(espChipPowerDown, LOW);
+  Serial1.flush();
+}
+
+
+//========================================
+//========================================   ESP SETTING
+//========================================
+
+void EPSconnectToAP() {
+  Serial.println("EPSconnectToAP() start");
+  String atCommand = "AT+CWJAP=\"" + ssid + "\",\"" + password + "\"";
+
+  if (!ESPSendAndCheckReturn(atCommand, "WIFI CONNECTED", "FAIL")) {
+    Serial.println("EPSconnectToAP() start");
+    // restart ESP
+    return;
+  }
+
+  if (!ESPcheckReturn("WIFI GOT IP")) {
+    Serial.println("EPSconnectToAP() start");
+    // restart ESP
+    return;
+  }
+  Serial.println("EPSconnectToAP() succesfull");
+}
+
 void setESPMode(String ESPmode) {
   String atCommand = "AT+CWMODE=";
 
@@ -20,21 +50,16 @@ void setESPMode(String ESPmode) {
   if (ESPmode == "both")
     atCommand += "3";
 
-
   //send at command and check for succes
-  Serial.print("setESPMode() set mode command ESP :" + atCommand);
-  Serial.println(atCommand);
   if (ESPSendAndCheckReturn(atCommand, "OK", "FAIL"))
   {
-    Serial.println("setESPMode() succesfull. ESP set mode " + ESPmode);
+    Serial.println("setESPMode() succesfull. mode " + ESPmode);
   }
   else
   {
     Serial.println("setESPMode() fail");
   }
 }
-
-
 
 //========================================
 //========================================  CONFIG ESP
@@ -43,8 +68,9 @@ void setESPMode(String ESPmode) {
 void ESPconfigure() {
   Serial.println("ESPconfigure() start setESPMode");
   setESPMode("station");
+  EPSconnectToAP();
+  Serial.println("ESPconfigure() end");
 }
-
 
 bool ESPReadyForCommand() {
   if (ESPSendAndCheckReturn("AT", "OK", "ERROR")) {
@@ -55,33 +81,25 @@ bool ESPReadyForCommand() {
   }
 }
 
-void restartESP() {
-  pinMode(espChipPowerDown, OUTPUT);
-  digitalWrite(espChipPowerDown, LOW);
-  delay(4000);
-  digitalWrite(espChipPowerDown, HIGH);
-}
-
-void startESP() {
+boolean startESP() {
   Serial.println("startESP() running function");
   pinMode(espChipPowerDown, OUTPUT);
   digitalWrite(espChipPowerDown, HIGH);
 
   if (!ESPcheckReturn("ready")) {
     Serial.println("startESP() ESP fail. No ready");
-    return;
+    return false;
   }
 
   //check if wifi is connected
+  Serial.println("startESP() checking for WIFI CONNECTED");
   if (!ESPcheckReturn("WIFI CONNECTED")) {
-    //do configuration
+    //if not connected configure ESP
     ESPconfigure();
-  }
-
-  // check if got IP
-  if (ESPcheckReturn("WIFI GOT IP")) {
+  } else if (ESPcheckReturn("WIFI GOT IP")) {
     //get connect to weather api
     Serial.println("startESP() check for weather");
+    return true;
   }
   else {
     //do configuration
@@ -92,10 +110,7 @@ void startESP() {
 void joinAP () {
   String atCommand = "AT+CWJAP=";
   atCommand += '"' + ssid + "\",\"" + password + '"';
-
   Serial.println(atCommand);
-
-  //  AT+ CWJAP =ssid,ssid
 }
 
 void clearSerialBuffer() {
@@ -114,3 +129,6 @@ void serialBrigde() {
     Serial1.write( Serial.read() );
   }
 }
+
+
+

@@ -2,9 +2,11 @@ String errorWord = "ERROR";
 
 boolean ESPcheckReturn (String checkForMsg) {
   String espMsg;
+  Serial.println();
+
   //Listen 6 times
   for (int i = 0; i <= 12; i++) {
-    Serial.print("ESPcheckReturn() loop : ");
+    Serial.print("ESPcheckReturn() checking for " + checkForMsg + " : ");
     Serial.println(i);
 
     delay(500);
@@ -20,7 +22,7 @@ boolean ESPcheckReturn (String checkForMsg) {
         espMsg = espMsg.trim();
         // check if the message is "OK"
         if (espMsg == checkForMsg) {
-          Serial.println("ESPcheckReturn() succesful. ESP MSG '" + espMsg + "'");
+          Serial.println("ESPcheckReturn() succesful");
           return true;
         }
         else {
@@ -47,12 +49,12 @@ boolean ESPcheckReturn (String checkForMsg) {
 
 bool ESPSendAndCheckReturn(String atCommand, String checkForMsg, String errorMsg) {
   String espMsg;
-  Serial.println("Sending AT commnand : '" + atCommand + "'. check for msg '" + checkForMsg + "' and error Msg '" + errorMsg + "'");
   Serial1.println(atCommand);
+  Serial.println();
 
   //Listen 6 times
   for (int i = 0; i <= 12; i++) {
-    Serial.print("ESPSendAndCheckReturn() loop :\t");
+    Serial.print("ESPSendAndCheckReturn() at" + atCommand +  "\t check for " + checkForMsg + "\t : ");
     Serial.println(i);
 
     delay(500);
@@ -68,19 +70,22 @@ bool ESPSendAndCheckReturn(String atCommand, String checkForMsg, String errorMsg
         espMsg = espMsg.trim();
         // check if the message is "OK"
         if (espMsg == checkForMsg) {
-          Serial.println("ESPSendAndCheckReturn() succesful. esp says : '" + checkForMsg + "'");
+          Serial.println("ESPSendAndCheckReturn() succesful");
+          espMsg = "";
           return true;
+          break;
         }
         else {
           if (espMsg == errorWord) {
-            Serial.println("ESPSendAndCheckReturn() failed. esp says" + checkForMsg + "'");
+            Serial.println("ESPSendAndCheckReturn() failed");
+            espMsg = "";
             return false;
           }
         }
 
         //Send  esp message to serial if not '\n'
         if (espMsg != "") {
-          Serial.println("ESPSendAndCheckReturn() ESP message : '" + espMsg + "'");
+          Serial.println("ESPSendAndCheckReturn() ESP message '" + espMsg + "'");
         }
         //after reading a new line delete the whole string
         espMsg = "";
@@ -88,8 +93,9 @@ bool ESPSendAndCheckReturn(String atCommand, String checkForMsg, String errorMsg
     }
   }
 
-  //if i check for 12 time and no wishfull result, return false
-  Serial.println("ESPSendAndCheckReturn() no succes");
+  //if i check for 12 time and no wishfull result, return false\
+  Serial.println("ESPSendAndCheckReturn() no succes: ");
+  Serial.println("ESPSendAndCheckReturn() last command '" + atCommand + "'. check for msg '" + checkForMsg + "' and error Msg '" + errorMsg + "'\r");
   return false;
 }
 
