@@ -1,5 +1,6 @@
 String errorWord = "ERROR";
 
+
 boolean ESPcheckReturn (String checkForMsg) {
   String espMsg;
   Serial.println();
@@ -50,14 +51,13 @@ boolean ESPcheckReturn (String checkForMsg) {
 bool ESPSendAndCheckReturn(String atCommand, String checkForMsg, String errorMsg) {
   String espMsg;
   Serial1.println(atCommand);
-  Serial.println();
 
   //Listen 6 times
   for (int i = 0; i <= 12; i++) {
-    Serial.print("ESPSendAndCheckReturn() at" + atCommand +  "\t check for " + checkForMsg + "\t : ");
+    Serial.print("ESPSendAndCheckReturn() at \t" + atCommand +  "\t check for " + checkForMsg + "\t : ");
     Serial.println(i);
 
-    delay(500);
+    delay(1000);
 
     while (Serial1.available()) {
       delay(10);
@@ -97,5 +97,16 @@ bool ESPSendAndCheckReturn(String atCommand, String checkForMsg, String errorMsg
   Serial.println("ESPSendAndCheckReturn() no succes: ");
   Serial.println("ESPSendAndCheckReturn() last command '" + atCommand + "'. check for msg '" + checkForMsg + "' and error Msg '" + errorMsg + "'\r");
   return false;
+}
+
+String epsReturnInfo() {
+  String espMsg;
+
+  // Send bytes from ESP8266 -> Teensy to Computer
+  while ( Serial1.available() ) {
+    delay(10);
+    espMsg += Serial1.read();
+  }
+  return espMsg;
 }
 

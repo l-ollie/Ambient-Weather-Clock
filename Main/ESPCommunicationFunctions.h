@@ -61,10 +61,6 @@ void setESPMode(String ESPmode) {
   }
 }
 
-//========================================
-//========================================  CONFIG ESP
-//========================================
-
 void ESPconfigure() {
   Serial.println("ESPconfigure() start setESPMode");
   setESPMode("station");
@@ -112,12 +108,6 @@ void joinAP () {
   atCommand += '"' + ssid + "\",\"" + password + '"';
   Serial.println(atCommand);
 }
-
-void clearSerialBuffer() {
-  delay(1000);
-  Serial1.flush();
-}
-
 void serialBrigde() {
   // Send bytes from ESP8266 -> Teensy to Computer
   while ( Serial1.available() ) {
@@ -130,5 +120,54 @@ void serialBrigde() {
   }
 }
 
+//========================================
+//========================================  EPS BASIC
+//========================================
+
+void clearSerialBuffer() {
+  delay(1000);
+  Serial1.flush();
+}
+
+//========================================
+//========================================  GET WEATHER
+//========================================
+void getWeather() {
+  Serial.println("getWeather() start");
+  String atCommand = "AT+CIPSTART=\"TCP\",\"" + weatherApi + "\",80";
+
+  if (!ESPSendAndCheckReturn(atCommand, "CONNECT", "ERROR")) {
+    Serial.println("getWeather() fail no connect");
+    return;
+  }
+  Serial.println("getWeather() connection opened");
+
+  if (!ESPcheckReturn("OK")) {
+    Serial.println("getWeather() fail no ok");
+    return;
+  }
+  Serial.print("getWeather() send the String size of ");
+  atCommand = "";
+  atCommand = "GET /data/2.5/weather?q=";
+  atCommand += weatherApiCityInNl;
+  atCommand += ",nl&appid=" ;
+  atCommand += weatherApiKey;
+
+
+  String atCommand2 =   "AT+CIPSEND=";
+
+  //adding + 2 to the lenth because println adds a '/r'
+  atCommand2 += (atCommand.length()+2);
+  Serial.println("getWeather() sending at \"" + atCommand2 + "\"");
+
+  if (!ESPSendAndCheckReturn(atCommand2, "OK", "ERROR")) {
+    Serial.println("getWeather() failed no OK");
+    return;
+  }
+
+  Serial.print("send :" + atCommand);
+  Serial1.println(atCommand);
+
+}
 
 
