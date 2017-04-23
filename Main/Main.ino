@@ -13,8 +13,10 @@ void setup() {
   Serial1.begin(115200);
 
   //Turn esp ON (functions normal)
-      restartESP();
-
+      startESP();
+//  pinMode(2, OUTPUT);
+//  delay(3000);
+//  digitalWrite(2, HIGH);
 }
 
 void loop() {

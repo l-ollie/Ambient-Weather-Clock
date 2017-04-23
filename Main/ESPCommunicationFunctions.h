@@ -3,59 +3,80 @@
 //Define esp CHPD pin
 const int espChipPowerDown = 2;
 
+//========================================
+//========================================  CONFIG ESP
+//========================================
+//AT+CWMODE=1
+void setESPMode(String ESPmode) {
+  String atCommand = "AT+CWMODE=";
 
-void restartESP() {
-  pinMode(espChipPowerDown, OUTPUT);
+  if (ESPmode == "station")
+    atCommand = "AT+CWMODE=" + 1;
 
-  Serial.println("restartESP() running function");
-  if (digitalRead(espChipPowerDown)) {
-    Serial.println("restartESP() CHPD is HIGH, turning it to LOW");
-    digitalWrite(espChipPowerDown, LOW);
-    delay(3000);
-  }
+  if (ESPmode == "accessPoint")
+    atCommand = "AT+CWMODE=" + 2;
 
-  digitalWrite(espChipPowerDown, HIGH);
-  if (ESPcheckReturn("WIFI CONNECTED")) {
-    Serial.println("restartESP() ESP is conneced to the internet");
-  } else {
-    Serial.println("restartESP() ESP doesn't return the wishfull response");
+  if (ESPmode == "both")
+    atCommand = "AT+CWMODE=" + 3;
+
+  if (ESPSendAndCheckReturn(atCommand, "OK", "FAIL")) {
+    Serial.println("setESPMode() succesfull. EPS ready for use");
+
   }
 }
 
-bool ESPSendAndCheckReturn(String atCommand, String checkForMsg, String errorMsg) {
-  String espMsg;
 
-  Serial.println("Sending AT commnand : '" + atCommand + "'. check for msg '" + checkForMsg + "' and error Msg '" + errorMsg + "'");
-  Serial1.println(atCommand);
-  delay(6000);
+//========================================
+//========================================  CONFIG ESP
+//========================================
 
-  while (Serial1.available()) {
-    delay(10);
-    char inChar = (char)Serial1.read();
-    espMsg += inChar;
+bool ESPReadyForCommand() {
+  if (ESPSendAndCheckReturn("AT", "OK", "ERROR")) {
+    Serial.println("ESPReadyForCommand() succesfull. EPS ready for use");
+    return true;
+  } else {
+    Serial.println("ESPReadyForCommand() fail. No response from EPS");
+  }
+}
 
-    //  check if I see a new line
-    if (inChar == '\n' || inChar == '\r') {
-      // trim string so I can do the comparson
-      espMsg = espMsg.trim();
-      // check if the message is "OK"
-      if (espMsg == checkForMsg) {
-        Serial.println("ESPSendAndCheckReturn() COMPLEET ESP says : '" + checkForMsg + "'");
-        delay(2500);
-        return true;
+void restartESP() {
+  pinMode(espChipPowerDown, OUTPUT);
+  digitalWrite(espChipPowerDown, LOW);
+  delay(4000);
+  digitalWrite(espChipPowerDown, HIGH);
+}
+
+void startESP() {
+  pinMode(espChipPowerDown, OUTPUT);
+  Serial.println("startESP() running function");
+
+  digitalWrite(espChipPowerDown, HIGH);
+
+  if (ESPcheckReturn("ready"))
+  {
+    Serial.println("startESP() ESP is ready");
+
+    //wait for eps to make connection on it self
+    //    delay(3000);
+
+    // after cheking "ready" check if connected
+    if (ESPcheckReturn("WIFI CONNECTED"))
+    {
+      Serial.println("startESP() ESP WIFI CONNECTED ");
+      //after ckeck "WIFI CONNECTED" check if got IP
+      if (ESPcheckReturn("WIFI GOT IP"))
+      {
+        Serial.println("startESP() ESP WIFI GOT IP");
       }
-      else {
-        if (espMsg == errorMsg) {
-          Serial.println("ESPSendAndCheckReturn() ERROR ESP says" + errorMsg + checkForMsg + "'");
-          delay(2500);
-          return false;
-        }
-      }
-      //Send every esp message to serial
-      Serial.println("ESPSendAndCheckReturn() message : '" + espMsg + "'");
-      //after reading a new line delete the whole string
-      espMsg = "";
     }
+    //if no "WIFI CONNECTED" return
+    else
+    {
+      Serial.println("startESP() ESP no WIFI CONNECTED");
+    }
+    //if no "ready" return
+  } else {
+    Serial.println("startESP() ESP no ready");
   }
 }
 
@@ -66,9 +87,6 @@ void clearSerialBuffer() {
 
 void serialBrigde() {
   // Send bytes from ESP8266 -> Teensy to Computer
-  if ( Serial1.available())
-    Serial.print("serialBrigde() msg below");
-
   while ( Serial1.available() ) {
     Serial.write( Serial1.read() );
   }
