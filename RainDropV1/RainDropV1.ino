@@ -49,15 +49,15 @@ void setup() {
 }
 
 void loop () {
-  updateRain();
+  updateRain(windSpeed);
   strip.show();
 
 }
 
 
-void updateRain() {
-  rainDropEdgeBegin += windSpeed;
-  rainDropEdgeEnd += windSpeed;
+void updateRain(uint16_t _windSpeed) {
+  rainDropEdgeBegin += _windSpeed;
+  rainDropEdgeEnd += _windSpeed;
   uint16_t margin = 40;
   
   if (random(rainMax) <= rainIntensity) {
