@@ -6,8 +6,9 @@
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(Pixels, PIN, NEO_GRB + NEO_KHZ800);
 
 float dimForce = 0.05;
-const uint16_t rainMax = 150;
-uint16_t rainIntensity = 1;
+const uint16_t rainMax = 300;
+// rainIntensity 0 - 50
+uint16_t rainIntensity = 50;
 
 const uint16_t halfPixels = Pixels * 0.5;
 
@@ -30,7 +31,7 @@ uint16_t windSpeed = 0;
 
 void setup() {
   strip.begin();
-  strip.setBrightness(255);
+  strip.setBrightness(55);
 
   // Initialize layer2RGB
   for (uint16_t l = 0; l < Pixels; l++) {
